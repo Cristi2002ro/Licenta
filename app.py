@@ -1,12 +1,13 @@
 import os
 import constants 
 
-from langchain.vectorstores import Chroma
-from langchain.embeddings import OpenAIEmbeddings
+from langchain_chroma import Chroma
 from langchain.chains import RetrievalQA
-from langchain.document_loaders import TextLoader
+from langchain_community.document_loaders import TextLoader
 from langchain.text_splitter import CharacterTextSplitter
 
+from langchain_openai import OpenAIEmbeddings
+from langchain_openai import OpenAI
 
 
 os.environ["OPENAI_API_KEY"] = constants.APIKEY
@@ -14,15 +15,13 @@ os.environ["OPENAI_API_KEY"] = constants.APIKEY
 embeddings = OpenAIEmbeddings()
 
 # Încărcăm și procesăm documentele
-loader = TextLoader("data.txt")  # Înlocuiește cu calea corectă
+loader = TextLoader("data.txt")
 documents = loader.load()
 
 # Împărțim textul în chunks
 text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
 texts = text_splitter.split_documents(documents)
 
-# Creăm și persistăm vectorstore-ul folosind Chroma
-# Specificăm un director pentru persistență
 persist_directory = "chroma_db"
 
 vectorstore = Chroma.from_documents(
@@ -31,21 +30,13 @@ vectorstore = Chroma.from_documents(
     persist_directory=persist_directory
 )
 
-# Important: Salvăm explicit vectorstore-ul
-vectorstore.persist()
-
-# Pentru a încărca ulterior vectorstore-ul existent
 vectorstore = Chroma(
     persist_directory=persist_directory,
     embedding_function=embeddings
 )
-
-# Creăm retriever-ul
 retriever = vectorstore.as_retriever()
 
-# Creăm lanțul RetrievalQA
-from langchain.llms import OpenAI
-llm = OpenAI()  # sau alt model de limbaj la alegere
+llm = OpenAI()
 
 qa_chain = RetrievalQA.from_chain_type(
     llm=llm,
@@ -53,6 +44,8 @@ qa_chain = RetrievalQA.from_chain_type(
     retriever=retriever
 )
 
-# Execută interogări
-response = qa_chain.run("Ce face functia preprocess_text? explica cu bullet points")
+question= "Ce face functia train_model? explica cu bullet points"
+response = qa_chain.run(question)
+
+print("QUESTION: "+ question)
 print("ANSWER: "+ response)
