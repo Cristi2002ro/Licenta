@@ -69,8 +69,7 @@ qa_chain = RetrievalQA.from_chain_type(
     retriever=retriever
 )
 
-def askCodebase():
-    question = "Ce face functia askCodebase? explica cu bullet points"
+def askCodebase(question):
     response = qa_chain.run(question)
     print("QUESTION: "+ question)
     print("ANSWER: "+ response)
