@@ -1,5 +1,6 @@
 import os
 import constants 
+import functools
 
 from langchain_chroma import Chroma
 from langchain.chains import RetrievalQA
@@ -7,6 +8,7 @@ from langchain_community.document_loaders import TextLoader
 from langchain.text_splitter import CharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
 from langchain_openai import OpenAI
+from langchain.vectorstores import Qdrant
 from langchain.llms import Ollama
 
 os.environ["OPENAI_API_KEY"] = constants.APIKEY
@@ -40,16 +42,16 @@ def init_knowledgebase():
             print(f"- {file}")
 
     # Împărțim textul în chunks
-    text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+    text_splitter = CharacterTextSplitter(chunk_size=500, chunk_overlap=100)
     texts = text_splitter.split_documents(documents)
 
-    persist_directory = "chroma_db"
-
-    vectorstore = Chroma.from_documents(
-        documents=texts,
-        embedding=embeddings,
-        persist_directory=persist_directory
-    )
+    # persist_directory = "chroma_db"
+    # vectorstore = Chroma.from_documents(
+    #     documents=texts,
+    #     embedding=embeddings,
+    #     persist_directory=persist_directory
+    # )
+    vectorstore = Qdrant.from_documents(texts, embeddings, location=":memory:")
 
     retriever = vectorstore.as_retriever()
 
@@ -62,6 +64,7 @@ def init_knowledgebase():
     )
     return qa_chain
 
+@functools.lru_cache(maxsize=None) 
 def askCodebase(question):
     qa_chain=init_knowledgebase()
     response = qa_chain.run(question)
