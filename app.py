@@ -7,6 +7,7 @@ from langchain_community.document_loaders import TextLoader
 from langchain.text_splitter import CharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
 from langchain_openai import OpenAI
+from langchain.llms import Ollama
 
 os.environ["OPENAI_API_KEY"] = constants.APIKEY
 embeddings = OpenAIEmbeddings()
@@ -52,8 +53,8 @@ def init_knowledgebase():
 
     retriever = vectorstore.as_retriever()
 
-    llm = OpenAI()
-
+    #llm = OpenAI()
+    llm = Ollama(model="llama3.2")  
     qa_chain = RetrievalQA.from_chain_type(
         llm=llm,
         chain_type="stuff",
