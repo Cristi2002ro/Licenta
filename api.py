@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from app import askCodebase
+from gpt4o import askCodebase
 import os
 
 app = Flask(__name__)

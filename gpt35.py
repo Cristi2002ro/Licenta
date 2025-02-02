@@ -45,18 +45,18 @@ def init_knowledgebase():
     text_splitter = CharacterTextSplitter(chunk_size=500, chunk_overlap=100)
     texts = text_splitter.split_documents(documents)
 
-    # persist_directory = "chroma_db"
-    # vectorstore = Chroma.from_documents(
-    #     documents=texts,
-    #     embedding=embeddings,
-    #     persist_directory=persist_directory
-    # )
-    vectorstore = Qdrant.from_documents(texts, embeddings, location=":memory:")
+    persist_directory = "chroma_db"
+    vectorstore = Chroma.from_documents(
+        documents=texts,
+        embedding=embeddings,
+        persist_directory=persist_directory
+    )
+    #vectorstore = Qdrant.from_documents(texts, embeddings, location=":memory:")
 
     retriever = vectorstore.as_retriever()
 
-    #llm = OpenAI()
-    llm = Ollama(model="llama3.2")  
+    llm = OpenAI()
+    #llm = Ollama(model="llama3.2")  
     qa_chain = RetrievalQA.from_chain_type(
         llm=llm,
         chain_type="stuff",
