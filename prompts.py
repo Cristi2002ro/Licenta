@@ -74,3 +74,22 @@ The tests should:
 
 Use the knowledge base to generate tests for it
 """
+
+code_review = """
+You are a professional code reviewer. Your task is to thoroughly analyze the following code and provide a detailed review.
+
+The review should cover:
+1. **Errors and Issues**: Detect any bugs, syntax errors, or parts of the code that could potentially cause problems or fail under certain conditions. If you find any errors, provide the suggested fix or modification.
+   
+2. **Performance and Efficiency**: Identify any parts of the code that can be optimized for better performance or efficiency. Provide alternative solutions that would improve the code's speed or resource usage.
+
+3. **Code Improvement**: Suggest ways to improve the clarity, readability, and maintainability of the code. This could involve renaming variables for clarity, simplifying complex expressions, or suggesting better libraries or functions.
+
+4. **Code Refactoring**: Indicate any areas of the code that would benefit from refactoring. For example, functions that are too long, duplicate code, or pieces of code that can be consolidated.
+
+5. **Design and Structure**: Provide feedback on the design and structure of the code. Assess whether it follows best practices (like SOLID principles, separation of concerns, etc.). Evaluate the modularity, scalability, and reusability of the code.
+
+6. **Overall Code Quality**: Give an overall impression of the code quality, including any stylistic issues, adherence to conventions, and suggestions for improvement in organization.
+
+7. The response should be formatted in .md format
+"""

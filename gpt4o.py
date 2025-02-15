@@ -50,17 +50,16 @@ def answer(prompt, context):
     model="gpt-4o-mini",
     messages=[
         {"role": "system", "content": prompts.system_context_propmt},
-        {"role": "system", "content": context },
+        {"role": "system", "content": context},
         {"role": "user", "content": prompt}
     ],
     temperature=0.4,  # Mai echilibrat
     top_p=0.85  # Reduce răspunsurile prea imprevizibile
-)
+    )
 
     return response.choices[0].message.content.strip() 
 
  
-
 @functools.lru_cache(maxsize=None) 
 def askCodebase(question):
     context = load_knowledge_base() 
