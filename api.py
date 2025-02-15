@@ -1,6 +1,7 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from gpt4o import askCodebase
 import os
+import prompts
 
 app = Flask(__name__)
 
@@ -10,6 +11,36 @@ def ask_question():
     if question is None:
         return jsonify({"error":"Field question is missing"}),400
     return jsonify({"answer": askCodebase(question)})
+
+
+def save_markdown_to_file(markdown_content, file_name):
+    # Scrie conținutul Markdown într-un fișier
+        with open(file_name, "w", encoding="utf-8") as file:
+            file.write(markdown_content)
+
+@app.route('/documentation', methods=['GET'])
+def documentation():
+    # Obține răspunsul din funcția askCodebase
+    resp = askCodebase(prompts.documentation_prompt)
+    
+    # Salvează fișierul markdown
+    file_name = "documentation.md"
+    save_markdown_to_file(resp, file_name)
+    
+    # Returnează fișierul generat
+    return send_file(file_name, as_attachment=True)
+
+@app.route('/unit-test', methods=['GET'])
+def unit_tests():
+     # Obține răspunsul din funcția askCodebase
+    resp = askCodebase(prompts.unit_tests_prompt)
+    
+    # Salvează fișierul markdown
+    file_name = "tests.py"
+    save_markdown_to_file(resp, file_name)
+    
+    # Returnează fișierul generat
+    return send_file(file_name, as_attachment=True)
 
 
 # Define folderul unde vor fi salvate fisierele

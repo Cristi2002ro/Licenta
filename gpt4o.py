@@ -2,6 +2,7 @@ import os
 import constants 
 import functools
 import openai
+import prompts
 from langchain_community.document_loaders import TextLoader
 from langchain.text_splitter import CharacterTextSplitter
 
@@ -46,14 +47,15 @@ def answer(prompt, context):
         raise ValueError("Context și prompt trebuie să fie șiruri de caractere!")
 
     response = openai.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[ 
-            {"role": "system", "content": context},
-            {"role": "user", "content": prompt}
-        ],
-        max_completion_tokens=400, 
-
-    )
+    model="gpt-4o-mini",
+    messages=[
+        {"role": "system", "content": prompts.system_context_propmt},
+        {"role": "system", "content": context },
+        {"role": "user", "content": prompt}
+    ],
+    temperature=0.4,  # Mai echilibrat
+    top_p=0.85  # Reduce răspunsurile prea imprevizibile
+)
 
     return response.choices[0].message.content.strip() 
 
