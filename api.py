@@ -1,10 +1,25 @@
 from flask import Flask, request, jsonify, send_file
+from flask_cors import CORS  # Import CORS
 from gpt4o import askCodebase
 from utils import save_response_to_file
 import os
 import prompts
 
 app = Flask(__name__)
+CORS(
+    app, 
+    resources={r"/*": {"origins": "https://v0-dev-assistent.vercel.app"}},
+    supports_credentials=True
+)
+
+
+@app.after_request
+def add_cors_headers(response):
+    response.headers["Access-Control-Allow-Origin"] = "https://v0-dev-assistent.vercel.app"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+    return response
 
 @app.route('/ask', methods=['GET'])
 def ask_question():
@@ -13,7 +28,7 @@ def ask_question():
         return jsonify({"error":"Field question is missing"}),400
     return jsonify({"answer": askCodebase(question)})
 
-#de adaugat? parametru optional de additional prompt pt completari ulterioare si adaugiri la prompt in caz ca raspunsul initial nu e bun
+#todo de adaugat? parametru optional de additional prompt pt completari ulterioare si adaugiri la prompt in caz ca raspunsul initial nu e bun
 @app.route('/documentation', methods=['GET'])
 def documentation():
     # Obține răspunsul din funcția askCodebase
@@ -31,8 +46,7 @@ def unit_tests():
      # Obține răspunsul din funcția askCodebase
     resp = askCodebase(prompts.unit_tests_prompt)
     
-    # Salvează fișierul markdown
-    file_name = "tests.py"
+    file_name = "tests.txt"
     save_response_to_file(resp, file_name)
     
     # Returnează fișierul generat
@@ -42,7 +56,7 @@ def unit_tests():
 def code_review():
      # Obține răspunsul din funcția askCodebase
     resp = askCodebase(prompts.code_review)
-    return resp
+    return jsonify({"answer": resp})
 
 
 # Define folderul unde vor fi salvate fisierele
