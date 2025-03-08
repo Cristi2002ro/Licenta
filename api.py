@@ -11,7 +11,6 @@ CORS(
     supports_credentials=True
 )
 
-
 @app.after_request
 def add_cors_headers(response):
     response.headers["Access-Control-Allow-Origin"] = "https://v0-dev-assistent.vercel.app"
@@ -22,33 +21,33 @@ def add_cors_headers(response):
 
 @app.route('/ask', methods=['GET'])
 def ask_question():
+    model = request.headers.get("Ai-Model")
     question = request.json.get("question")
     if question is None:
         return jsonify({"error":"Field question is missing"}),400
-    return jsonify({"answer": askCodebase(question)})
+    return jsonify({"answer": askCodebase(question, model)})
 
 #todo de adaugat? parametru optional de additional prompt pt completari ulterioare si adaugiri la prompt in caz ca raspunsul initial nu e bun
 @app.route('/documentation', methods=['GET'])
 def documentation():
-    # Obține răspunsul din funcția askCodebase
-    resp = askCodebase(prompts.documentation_prompt)
+    model = request.headers.get("Ai-Model")
+    resp = askCodebase(prompts.documentation_prompt, model)
     
     return jsonify({"answer": resp})
 
 @app.route('/unit-test', methods=['GET'])
 def unit_tests():
-     # Obține răspunsul din funcția askCodebase
-    resp = askCodebase(prompts.unit_tests_prompt)
+    model = request.headers.get("Ai-Model")
+    resp = askCodebase(prompts.unit_tests_prompt, model)
     return jsonify({"answer": resp}) 
 
 @app.route('/code-review', methods=['GET'])
 def code_review():
-     # Obține răspunsul din funcția askCodebase
-    resp = askCodebase(prompts.code_review)
+    model = request.headers.get("Ai-Model")
+    resp = askCodebase(prompts.code_review, model)
     return jsonify({"answer": resp})
 
 
-# Define folderul unde vor fi salvate fisierele
 UPLOAD_FOLDER = 'knowledge_base'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 

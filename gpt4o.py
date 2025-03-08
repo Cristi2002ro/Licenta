@@ -40,7 +40,7 @@ def load_knowledge_base():
     context = "\n".join([doc.page_content for doc in documents])
     return context
 
-def answer(prompt, context):
+def openAiAnswer(prompt, context):
     openai.api_key = constants.APIKEY
 
     if not isinstance(context, str) or not isinstance(prompt, str):
@@ -59,11 +59,18 @@ def answer(prompt, context):
 
     return response.choices[0].message.content.strip() 
 
+def answer(prompt, context, model):
+    match model:
+        case "openai":
+            return openAiAnswer(prompt, context)
+        case _:
+            return openAiAnswer(prompt, context)
+
  
 @functools.lru_cache(maxsize=None) 
-def askCodebase(question):
+def askCodebase(question, model):
     context = load_knowledge_base() 
-    response = answer(question, context)
+    response = answer(question, context, model)
     print("CONTEXT: "+context) 
     print("QUESTION: "+ question)
     print("ANSWER: "+ response)
