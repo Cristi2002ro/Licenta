@@ -1,7 +1,6 @@
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS  # Import CORS
 from gpt4o import askCodebase
-from utils import save_response_to_file
 import os
 import prompts
 
@@ -18,7 +17,7 @@ def add_cors_headers(response):
     response.headers["Access-Control-Allow-Origin"] = "https://v0-dev-assistent.vercel.app"
     response.headers["Access-Control-Allow-Credentials"] = "true"
     response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
-    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, Ai-Model"
     return response
 
 @app.route('/ask', methods=['GET'])
@@ -34,23 +33,13 @@ def documentation():
     # Obține răspunsul din funcția askCodebase
     resp = askCodebase(prompts.documentation_prompt)
     
-    # Salvează fișierul markdown
-    file_name = "documentation.md"
-    save_response_to_file(resp, file_name)
-    
-    # Returnează fișierul generat
-    return send_file(file_name, as_attachment=True)
+    return jsonify({"answer": resp})
 
 @app.route('/unit-test', methods=['GET'])
 def unit_tests():
      # Obține răspunsul din funcția askCodebase
     resp = askCodebase(prompts.unit_tests_prompt)
-    
-    file_name = "tests.txt"
-    save_response_to_file(resp, file_name)
-    
-    # Returnează fișierul generat
-    return send_file(file_name, as_attachment=True)
+    return jsonify({"answer": resp}) 
 
 @app.route('/code-review', methods=['GET'])
 def code_review():
