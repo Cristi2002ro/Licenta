@@ -2,11 +2,13 @@ import os
 import constants 
 import functools
 import openai
+import time
 from langchain_community.document_loaders import TextLoader
 from langchain.text_splitter import CharacterTextSplitter
 
 CONTEXT = None
 THREAD_ID = None  
+CONTEXT_VERSION = 0 
 
 def load_documents_from_directory(directory_path):
     documents = []
@@ -27,7 +29,7 @@ def load_documents_from_directory(directory_path):
     return documents, skipped_files
 
 def load_knowledge_base():
-    global CONTEXT, THREAD_ID
+    global CONTEXT, THREAD_ID, CONTEXT_VERSION
     
     documents, skipped_files = load_documents_from_directory("knowledge_base")
     print(f"\nTotal documente încărcate: {len(documents)}")
@@ -51,7 +53,7 @@ def load_knowledge_base():
         role="user",
         content=f"{CONTEXT}\n\nThis is the code context."
     )
-
+    CONTEXT_VERSION += 1
     return CONTEXT
 
 def openAiAnswer(prompt):
@@ -86,6 +88,7 @@ def openAiAnswer(prompt):
         run_status = openai.beta.threads.runs.retrieve(thread_id=THREAD_ID, run_id=run.id)
         if run_status.status == "completed":
             break
+        time.sleep(1)
     
     # Fetch messages from the thread
     messages = openai.beta.threads.messages.list(thread_id=THREAD_ID)
@@ -99,10 +102,18 @@ def answer(prompt, model):
             return openAiAnswer(prompt)
         case _:
             return openAiAnswer(prompt)
- 
-@functools.lru_cache(maxsize=None) 
-def askCodebase(question, model):
+
+@functools.lru_cache(maxsize=None)
+def _askCodebase_cached(question, model, context_version):
     response = answer(question, model)
-    print("QUESTION: "+ question)
-    print("ANSWER: "+ response)
+    print("QUESTION: " + question)
+    print("ANSWER: " + response)
     return response
+
+def askCodebase(question, model):
+    """
+    Funcția publică de apel către codul cache.
+    Folosește versiunea curentă a contextului pentru a evita răspunsurile cache atunci când contextul s-a schimbat.
+    """
+    global CONTEXT_VERSION
+    return _askCodebase_cached(question, model, CONTEXT_VERSION)
