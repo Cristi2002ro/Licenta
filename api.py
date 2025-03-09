@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS  # Import CORS
-from gpt4o import askCodebase
+from gpt4o import askCodebase, load_knowledge_base
 import os
 import prompts
 
@@ -71,6 +71,7 @@ def upload_directory():
                 file.save(file_path)
                 saved_files.append(file.filename)
         
+        load_knowledge_base()
         return jsonify({
             "message": "Files uploaded successfully",
             "files": saved_files

@@ -2,9 +2,11 @@ import os
 import constants 
 import functools
 import openai
-import prompts
 from langchain_community.document_loaders import TextLoader
 from langchain.text_splitter import CharacterTextSplitter
+
+CONTEXT = None
+THREAD_ID = None  
 
 def load_documents_from_directory(directory_path):
     documents = []
@@ -25,53 +27,82 @@ def load_documents_from_directory(directory_path):
     return documents, skipped_files
 
 def load_knowledge_base():
-    # Încărcăm și procesăm documentele din întregul director
+    global CONTEXT, THREAD_ID
+    
     documents, skipped_files = load_documents_from_directory("knowledge_base")
     print(f"\nTotal documente încărcate: {len(documents)}")
     if skipped_files:
         print("\nFișiere sărite:")
         for file in skipped_files:
             print(f"- {file}")
-
-    # Împărțim textul în chunks
+    
+    # Split text into chunks
     text_splitter = CharacterTextSplitter(chunk_size=500, chunk_overlap=100)
     texts = text_splitter.split_documents(documents)
 
-    context = "\n".join([doc.page_content for doc in documents])
-    return context
+    CONTEXT = "\n".join([doc.page_content for doc in documents])
 
-def openAiAnswer(prompt, context):
+    # Initialize thread once and send context
     openai.api_key = constants.APIKEY
+    THREAD_ID = openai.beta.threads.create().id  
 
-    if not isinstance(context, str) or not isinstance(prompt, str):
-        raise ValueError("Context și prompt trebuie să fie șiruri de caractere!")
-
-    response = openai.chat.completions.create(
-    model="gpt-4o-mini",
-    messages=[
-        {"role": "system", "content": prompts.system_context_propmt},
-        {"role": "system", "content": context},
-        {"role": "user", "content": prompt}
-    ],
-    temperature=0.4,  # Mai echilibrat
-    top_p=0.85  # Reduce răspunsurile prea imprevizibile
+    openai.beta.threads.messages.create(
+        thread_id=THREAD_ID,
+        role="user",
+        content=f"{CONTEXT}\n\nThis is the code context."
     )
 
-    return response.choices[0].message.content.strip() 
+    return CONTEXT
 
-def answer(prompt, context, model):
+def openAiAnswer(prompt):
+    global CONTEXT, THREAD_ID
+    if CONTEXT is None:
+        CONTEXT = load_knowledge_base()
+
+    openai.api_key = constants.APIKEY
+    assistant_id = "asst_tz1r8pideUQ7THzxevwDWEvI"
+
+    if not isinstance(prompt, str):
+        raise ValueError("Prompt trebuie să fie un șir de caractere!")
+
+    if THREAD_ID is None:
+        THREAD_ID = openai.beta.threads.create().id  # Ensure thread exists
+
+    # Add new message to the same thread (context is already known)
+    openai.beta.threads.messages.create(
+        thread_id=THREAD_ID,
+        role="user",
+        content=prompt
+    )
+
+    # Run the assistant
+    run = openai.beta.threads.runs.create(
+        thread_id=THREAD_ID,
+        assistant_id=assistant_id
+    )
+
+    # Poll for the result (since assistant calls are async)
+    while True:
+        run_status = openai.beta.threads.runs.retrieve(thread_id=THREAD_ID, run_id=run.id)
+        if run_status.status == "completed":
+            break
+    
+    # Fetch messages from the thread
+    messages = openai.beta.threads.messages.list(thread_id=THREAD_ID)
+    
+    # Return the last message (assistant response)
+    return messages.data[0].content[0].text.value.strip()
+
+def answer(prompt, model):
     match model:
         case "openai":
-            return openAiAnswer(prompt, context)
+            return openAiAnswer(prompt)
         case _:
-            return openAiAnswer(prompt, context)
-
+            return openAiAnswer(prompt)
  
 @functools.lru_cache(maxsize=None) 
 def askCodebase(question, model):
-    context = load_knowledge_base() 
-    response = answer(question, context, model)
-    print("CONTEXT: "+context) 
+    response = answer(question, model)
     print("QUESTION: "+ question)
     print("ANSWER: "+ response)
     return response
