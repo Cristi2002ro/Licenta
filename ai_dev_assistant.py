@@ -6,6 +6,7 @@ import time
 from langchain_community.document_loaders import TextLoader
 from langchain.text_splitter import CharacterTextSplitter
 
+#global variables
 CONTEXT = None
 THREAD_ID = None  
 CONTEXT_VERSION = 0 
@@ -62,7 +63,7 @@ def openAiAnswer(prompt):
         CONTEXT = load_knowledge_base()
 
     openai.api_key = constants.APIKEY
-    assistant_id = "asst_tz1r8pideUQ7THzxevwDWEvI"
+    assistant_id = constants.ASSISTANT_ID
 
     if not isinstance(prompt, str):
         raise ValueError("Prompt trebuie să fie un șir de caractere!")
@@ -96,24 +97,13 @@ def openAiAnswer(prompt):
     # Return the last message (assistant response)
     return messages.data[0].content[0].text.value.strip()
 
-def answer(prompt, model):
-    match model:
-        case "openai":
-            return openAiAnswer(prompt)
-        case _:
-            return openAiAnswer(prompt)
-
 @functools.lru_cache(maxsize=None)
-def _askCodebase_cached(question, model, context_version):
-    response = answer(question, model)
-    print("QUESTION: " + question)
+def _askCodebase_cached(command, context_version):
+    response = openAiAnswer(command)
+    print("COMMAND: " + command)
     print("ANSWER: " + response)
     return response
 
-def askCodebase(question, model):
-    """
-    Funcția publică de apel către codul cache.
-    Folosește versiunea curentă a contextului pentru a evita răspunsurile cache atunci când contextul s-a schimbat.
-    """
+def askCodebase(question):
     global CONTEXT_VERSION
-    return _askCodebase_cached(question, model, CONTEXT_VERSION)
+    return _askCodebase_cached(question, CONTEXT_VERSION)

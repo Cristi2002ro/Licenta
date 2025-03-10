@@ -1,8 +1,12 @@
-from flask import Flask, request, jsonify, send_file
-from flask_cors import CORS  # Import CORS
-from gpt4o import askCodebase, load_knowledge_base
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+from ai_dev_assistant import askCodebase, load_knowledge_base
 import os
-import prompts
+
+#global variables
+DOCUMENTATION_COMMAND = "documentation"
+UNIT_TEST_COMMAND = "unit-test"
+CODE_REVIEW_COMMAND = "code-review"
 
 app = Flask(__name__)
 CORS(
@@ -16,35 +20,29 @@ def add_cors_headers(response):
     response.headers["Access-Control-Allow-Origin"] = "https://v0-dev-assistent.vercel.app"
     response.headers["Access-Control-Allow-Credentials"] = "true"
     response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, OPTIONS"
-    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, Ai-Model, Access-Control-Allow-Origin"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, Access-Control-Allow-Origin"
     return response
 
 @app.route('/ask', methods=['GET'])
 def ask_question():
-    model = request.headers.get("Ai-Model")
     question = request.json.get("question")
     if question is None:
         return jsonify({"error":"Field question is missing"}),400
-    return jsonify({"answer": askCodebase(question, model)})
+    return jsonify({"answer": askCodebase(question)})
 
-#todo de adaugat? parametru optional de additional prompt pt completari ulterioare si adaugiri la prompt in caz ca raspunsul initial nu e bun
 @app.route('/documentation', methods=['GET'])
 def documentation():
-    model = request.headers.get("Ai-Model")
-    resp = askCodebase(prompts.documentation_prompt, model)
-    
+    resp = askCodebase(DOCUMENTATION_COMMAND)
     return jsonify({"answer": resp})
 
 @app.route('/unit-test', methods=['GET'])
 def unit_tests():
-    model = request.headers.get("Ai-Model")
-    resp = askCodebase(prompts.unit_tests_prompt, model)
+    resp = askCodebase(UNIT_TEST_COMMAND)
     return jsonify({"answer": resp}) 
 
 @app.route('/code-review', methods=['GET'])
 def code_review():
-    model = request.headers.get("Ai-Model")
-    resp = askCodebase(prompts.code_review, model)
+    resp = askCodebase(CODE_REVIEW_COMMAND)
     return jsonify({"answer": resp})
 
 
