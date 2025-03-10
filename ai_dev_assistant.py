@@ -1,5 +1,4 @@
 import os
-import constants 
 import functools
 import openai
 import time
@@ -46,7 +45,7 @@ def load_knowledge_base():
     CONTEXT = "\n".join([doc.page_content for doc in documents])
 
     # Initialize thread once and send context
-    openai.api_key = constants.APIKEY
+    openai.api_key = os.getenv("OPENAI_API_KEY")
     THREAD_ID = openai.beta.threads.create().id  
 
     openai.beta.threads.messages.create(
@@ -62,8 +61,8 @@ def openAiAnswer(prompt):
     if CONTEXT is None:
         CONTEXT = load_knowledge_base()
 
-    openai.api_key = constants.APIKEY
-    assistant_id = constants.ASSISTANT_ID
+    openai.api_key = os.getenv("OPENAI_API_KEY")
+    assistant_id = os.getenv("ASSISTANT_ID")
 
     if not isinstance(prompt, str):
         raise ValueError("Prompt trebuie să fie un șir de caractere!")

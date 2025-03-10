@@ -1,12 +1,15 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from ai_dev_assistant import askCodebase, load_knowledge_base
+from dotenv import load_dotenv
 import os
 
 #global variables
 DOCUMENTATION_COMMAND = "documentation"
 UNIT_TEST_COMMAND = "unit-test"
 CODE_REVIEW_COMMAND = "code-review"
+
+load_dotenv()
 
 app = Flask(__name__)
 allowed_origins = [

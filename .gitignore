@@ -1,3 +1,4 @@
-constants.py
 /knowledge_base/
 /__pycache__/
+/venv/
+.env
