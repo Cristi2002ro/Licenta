@@ -9,18 +9,25 @@ UNIT_TEST_COMMAND = "unit-test"
 CODE_REVIEW_COMMAND = "code-review"
 
 app = Flask(__name__)
+allowed_origins = [
+    "https://ai-web-dev-assistant.vercel.app",
+    "https://v0-dev-assistent.vercel.app"
+]
+
 CORS(
     app, 
-    resources={r"/*": {"origins": "https://v0-dev-assistent.vercel.app"}},
+    resources={r"/*": {"origins": allowed_origins}},
     supports_credentials=True
 )
 
 @app.after_request
 def add_cors_headers(response):
-    response.headers["Access-Control-Allow-Origin"] = "https://v0-dev-assistent.vercel.app"
+    origin = request.headers.get("Origin")
+    if origin in allowed_origins:
+        response.headers["Access-Control-Allow-Origin"] = origin
     response.headers["Access-Control-Allow-Credentials"] = "true"
     response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, OPTIONS"
-    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, Access-Control-Allow-Origin"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
     return response
 
 @app.route('/ask', methods=['GET'])
