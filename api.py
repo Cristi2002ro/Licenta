@@ -16,13 +16,20 @@ allowed_origins = [
     "https://ai-web-dev-assistant.vercel.app",
     "https://v0-dev-assistent.vercel.app"
 ]
-
+CLIENT_ID = os.getenv("CLIENT_ID")
 CORS(
     app, 
     resources={r"/*": {"origins": allowed_origins}},
     supports_credentials=True
 )
 
+
+@app.before_request
+def check_client_id():
+    client_id = request.headers.get("Client-Id")
+    if client_id != CLIENT_ID:
+        return jsonify({"error": "Unauthorized"}), 401
+    
 @app.after_request
 def add_cors_headers(response):
     origin = request.headers.get("Origin")
