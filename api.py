@@ -26,6 +26,8 @@ CORS(
 
 @app.before_request
 def check_client_id():
+    if request.method == 'OPTIONS':
+        return
     client_id = request.headers.get("Client-Id")
     if client_id != CLIENT_ID:
         return jsonify({"error": "Unauthorized"}), 401
