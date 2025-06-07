@@ -43,20 +43,20 @@ def add_cors_headers(response):
 
 @app.route('/documentation', methods=['GET'])
 def documentation():
-    language = request.headers.get("language", "en")
-    resp = askCodebase(DOCUMENTATION_COMMAND.format(language=language))
+    responseLanguage = request.headers.get("language", "en")
+    resp = askCodebase(DOCUMENTATION_COMMAND.format(language=responseLanguage))
     return jsonify({"answer": resp})
 
 @app.route('/unit-test', methods=['GET'])
 def unit_tests():
-    language = request.headers.get("language", "en")
-    resp = askCodebase(UNIT_TEST_COMMAND.format(language=language))
+    responseLanguage = request.headers.get("language", "en")
+    resp = askCodebase(UNIT_TEST_COMMAND.format(language=responseLanguage))
     return jsonify({"answer": resp}) 
 
 @app.route('/code-review', methods=['GET'])
 def code_review():
-    language = request.headers.get("language", "en")
-    resp = askCodebase(CODE_REVIEW_COMMAND.format(language=language))
+    responseLanguage = request.headers.get("language", "en")
+    resp = askCodebase(CODE_REVIEW_COMMAND.format(language=responseLanguage))
     return jsonify({"answer": resp})
 
 
