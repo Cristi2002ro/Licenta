@@ -5,9 +5,9 @@ from dotenv import load_dotenv
 import os
 
 #global variables
-DOCUMENTATION_COMMAND = "documentation"
-UNIT_TEST_COMMAND = "unit-test"
-CODE_REVIEW_COMMAND = "code-review"
+DOCUMENTATION_COMMAND = "command: documentation, language: {language}"
+UNIT_TEST_COMMAND = "command: unit-test, language: {language}"
+CODE_REVIEW_COMMAND = "command: code-review, language: {language}"
 
 load_dotenv()
 
@@ -37,29 +37,26 @@ def add_cors_headers(response):
         response.headers["Access-Control-Allow-Origin"] = origin
     response.headers["Access-Control-Allow-Credentials"] = "true"
     response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, OPTIONS"
-    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, Client-Id"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, Client-Id, Language"
     return response
 
-@app.route('/ask', methods=['GET'])
-def ask_question():
-    question = request.json.get("question")
-    if question is None:
-        return jsonify({"error":"Field question is missing"}),400
-    return jsonify({"answer": askCodebase(question)})
 
 @app.route('/documentation', methods=['GET'])
 def documentation():
-    resp = askCodebase(DOCUMENTATION_COMMAND)
+    language = request.headers.get("language", "en")
+    resp = askCodebase(DOCUMENTATION_COMMAND.format(language=language))
     return jsonify({"answer": resp})
 
 @app.route('/unit-test', methods=['GET'])
 def unit_tests():
-    resp = askCodebase(UNIT_TEST_COMMAND)
+    language = request.headers.get("language", "en")
+    resp = askCodebase(UNIT_TEST_COMMAND.format(language=language))
     return jsonify({"answer": resp}) 
 
 @app.route('/code-review', methods=['GET'])
 def code_review():
-    resp = askCodebase(CODE_REVIEW_COMMAND)
+    language = request.headers.get("language", "en")
+    resp = askCodebase(CODE_REVIEW_COMMAND.format(language=language))
     return jsonify({"answer": resp})
 
 
