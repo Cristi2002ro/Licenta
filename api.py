@@ -3,6 +3,7 @@ from flask_cors import CORS
 from ai_dev_assistant import askCodebase, load_knowledge_base
 from dotenv import load_dotenv
 import os
+from session_manager import session_manager
 
 DOCUMENTATION_COMMAND = "command: documentation, language: {language}"
 UNIT_TEST_COMMAND = "command: unit-test, language: {language}"
@@ -86,6 +87,8 @@ def upload_directory():
     if not files:
         return jsonify({"error": "No files selected"}), 400
 
+    session_manager.clear_session_files(session_id)
+
     session_upload_folder = os.path.join(UPLOAD_FOLDER, session_id)
     os.makedirs(session_upload_folder, exist_ok=True)
 
@@ -99,7 +102,7 @@ def upload_directory():
         
         load_knowledge_base(session_id)
         return jsonify({
-            "message": "Files uploaded successfully",
+            "message": "Files uploaded successfully and knowledge base updated",
             "files": saved_files
         }), 200
 

@@ -41,4 +41,11 @@ class SessionManager:
         for session_id in expired:
             self.cleanup_session(session_id)
 
+    def clear_session_files(self, session_id):
+        """Clear all files for a session without removing the session itself"""
+        session_dir = os.path.join("knowledge_base", session_id)
+        if os.path.exists(session_dir):
+            for file in os.listdir(session_dir):
+                os.remove(os.path.join(session_dir, file))
+
 session_manager = SessionManager()
