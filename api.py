@@ -14,7 +14,7 @@ load_dotenv()
 app = Flask(__name__)
 allowed_origins = [
     "https://ai-web-dev-assistant.vercel.app",
-    "https://v0-dev-assistent.vercel.app"
+    "https://licenta-fe-stanescu.onrender.com"
 ]
 CLIENT_ID = os.getenv("CLIENT_ID")
 CORS(
